@@ -1,0 +1,44 @@
+.user-manager-container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.user-manager-table th,
+.user-manager-table td {
+  vertical-align: middle;
+}
+
+.user-manager-table .badge {
+  font-size: 1rem;
+  padding: 0.5em 1em;
+  background: transparent !important;
+  border: 1px solid #ccc;
+  color: #198754; /* green for active */
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  cursor: pointer;
+}
+.user-manager-table .badge.bg-danger {
+  color: #dc3545; /* red for inactive */
+  border-color: #dc3545;
+}
+.user-manager-table .badge.bg-success {
+  color: #198754;
+  border-color: #198754;
+}
+.user-manager-table .badge:hover {
+  background: #f1f1f1 !important;
+}
+
+.user-manager-table .btn {
+  min-width: 90px;
+  background: transparent !important;
+  border: 1px solid #0d6efd;
+  color: #0d6efd;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.user-manager-table .btn:hover,
+.user-manager-table .btn:focus {
+  background: #0d6efd !important;
+  color: #fff !important;
+  border: 1px solid #0d6efd;
+}

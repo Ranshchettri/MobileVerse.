@@ -1,0 +1,43 @@
+.contact-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+.contact-desc {
+  max-width: 500px;
+  text-align: center;
+  color: #555;
+}
+
+.contact-icons {
+  display: flex;
+  gap: 2rem;
+  margin: 1.5rem 0;
+  font-size: 2rem;
+}
+
+.contact-info {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.contact-map-wrapper {
+  width: 100vw;
+  max-width: 100vw;
+  padding: 0 16px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
+
+.contact-map {
+  width: 100%;
+  max-width: 600px;
+  height: 220px;
+  border: 0;
+  border-radius: 8px;
+}
