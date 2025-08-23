@@ -92,6 +92,11 @@ const ProductDetail = () => {
     setUser(userData);
   }, []);
 
+  // Scroll to top on id change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [id]);
+
   if (loading) {
     return (
       <Container className="text-center mt-5">
@@ -224,7 +229,7 @@ const ProductDetail = () => {
                       cursor: "pointer",
                       flex: "0 0 auto",
                     }}
-                    onClick={() => navigate(`/products/${rel.id}`)}
+                    onClick={() => navigate(`/product/${rel.id}`)} // <-- Fix here
                   >
                     <Card.Img
                       variant="top"
