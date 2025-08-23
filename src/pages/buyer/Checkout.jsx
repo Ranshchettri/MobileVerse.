@@ -165,7 +165,7 @@ const Checkout = () => {
                     fontSize: "1.1rem",
                   }}
                 >
-                  ✅ Confirm Order
+                   Confirm Order
                 </button>
               )}
               {payment === "advance" && (

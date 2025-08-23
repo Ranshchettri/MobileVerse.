@@ -1,6 +1,15 @@
 // src/pages/admin/ViewOrders.jsx
 import React, { useEffect, useState } from "react";
-import { Card, Container, Row, Col, Table } from "react-bootstrap";
+import {
+  Card,
+  Container,
+  Row,
+  Col,
+  Table,
+  Modal,
+  Button,
+  Form,
+} from "react-bootstrap";
 import api from "../../utils/api";
 import "./ViewOrders.css";
 
@@ -12,6 +21,8 @@ const ViewOrders = () => {
     bestProduct: "",
     productSales: [],
   });
+  const [showModal, setShowModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -107,6 +118,34 @@ const ViewOrders = () => {
     return style;
   };
 
+  const handleShowModal = (order) => {
+    setSelectedOrder(order);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedOrder(null);
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    if (!selectedOrder) return;
+    try {
+      await api.patch(`/orders/${selectedOrder.id}/`, {
+        order_status: newStatus,
+      });
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === selectedOrder.id ? { ...o, order_status: newStatus } : o
+        )
+      );
+      handleCloseModal();
+      // TODO: Backend le notification pathaune
+    } catch {
+      alert("Failed to update status");
+    }
+  };
+
   return (
     <Container className="my-4">
       <h2 className="mb-4"> Admin Dashboard - Orders Overview</h2>
@@ -158,7 +197,11 @@ const ViewOrders = () => {
                 <tr key={idx}>
                   <td>
                     <img
-                      src={product.image}
+                      src={
+                        product.image?.startsWith("http")
+                          ? product.image
+                          : `http://localhost:8000${product.image}`
+                      }
                       alt={product.name}
                       width={50}
                       height={50}
@@ -190,12 +233,13 @@ const ViewOrders = () => {
                 <th>Total</th>
                 <th>Status</th>
                 <th>Date</th>
+                <th>Detail</th> {/* New column */}
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center">
+                  <td colSpan="9" className="text-center">
                     No orders found.
                   </td>
                 </tr>
@@ -230,6 +274,7 @@ const ViewOrders = () => {
                             position: "relative",
                             minWidth: 110,
                           }}
+                          onClick={() => handleShowModal(order)}
                         >
                           {order.order_status.charAt(0).toUpperCase() +
                             order.order_status.slice(1)}
@@ -292,6 +337,18 @@ const ViewOrders = () => {
                         ? new Date(order.created_at).toLocaleString()
                         : "N/A"}
                     </td>
+                    <td>
+                      <Button
+                        variant="info"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setShowModal(true);
+                        }}
+                      >
+                        View
+                      </Button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -299,6 +356,181 @@ const ViewOrders = () => {
           </Table>
         </Card.Body>
       </Card>
+
+      {/* Order Status Update Modal */}
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Update Order Status</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedOrder && (
+            <Form>
+              <Form.Group controlId="formOrderStatus">
+                <Form.Label>Order ID</Form.Label>
+                <Form.Control type="text" value={selectedOrder.id} readOnly />
+              </Form.Group>
+              <Form.Group controlId="formOrderStatus">
+                <Form.Label>Status</Form.Label>
+                <Form.Select
+                  value={selectedOrder.order_status}
+                  onChange={(e) =>
+                    setSelectedOrder({
+                      ...selectedOrder,
+                      order_status: e.target.value,
+                    })
+                  }
+                >
+                  <option value="pending">Pending</option>
+                  <option value="processing">Processing</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </Form.Select>
+              </Form.Group>
+            </Form>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => handleStatusChange(selectedOrder.order_status)}
+          >
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Order Detail Modal */}
+      {showModal && selectedOrder && (
+        <Modal
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          centered
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Order Detail - #{selectedOrder.id}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              <strong>Customer:</strong> {selectedOrder.user?.full_name}
+              <br />
+              <strong>Email:</strong> {selectedOrder.user?.email}
+              <br />
+              <strong>Phone:</strong> {selectedOrder.user?.contact}
+              <br />
+              <strong>Address:</strong> {selectedOrder.user?.address}
+              <br />
+              <strong>Total:</strong> Rs. {selectedOrder.total_price}
+              <br />
+              <strong>Date:</strong>{" "}
+              {selectedOrder.date
+                ? new Date(selectedOrder.date).toLocaleString()
+                : selectedOrder.created_at
+                ? new Date(selectedOrder.created_at).toLocaleString()
+                : "N/A"}
+            </p>
+            <p>
+              <strong>Status:</strong>{" "}
+              <span style={getStatusStyle(selectedOrder.order_status)}>
+                {selectedOrder.order_status.charAt(0).toUpperCase() +
+                  selectedOrder.order_status.slice(1)}
+              </span>
+            </p>
+            {(selectedOrder.order_status === "delivered" ||
+              selectedOrder.order_status === "cancelled") && (
+              <div className="alert alert-info">
+                This order is <b>{selectedOrder.order_status}</b>.
+              </div>
+            )}
+            <Form.Group>
+              <Form.Label>Change Status</Form.Label>
+              <Form.Select
+                value={selectedOrder.order_status}
+                onChange={async (e) => {
+                  const newStatus = e.target.value;
+                  try {
+                    await api.patch(`/orders/${selectedOrder.id}/`, {
+                      order_status: newStatus,
+                    });
+                    setOrders((prev) =>
+                      prev.map((o) =>
+                        o.id === selectedOrder.id
+                          ? { ...o, order_status: newStatus }
+                          : o
+                      )
+                    );
+                    setSelectedOrder((prev) => ({
+                      ...prev,
+                      order_status: newStatus,
+                    }));
+                  } catch {
+                    alert("Failed to update status");
+                  }
+                }}
+                disabled={
+                  selectedOrder.order_status === "delivered" ||
+                  selectedOrder.order_status === "cancelled"
+                }
+              >
+                {[
+                  "pending",
+                  "processing",
+                  "shipped",
+                  "delivered",
+                  "cancelled",
+                ].map((s) => (
+                  <option key={s} value={s}>
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <hr />
+            <h5>Order Items</h5>
+            <Table size="sm" bordered>
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedOrder.items?.map((item, idx) => (
+                  <tr key={idx}>
+                    <td>
+                      <img
+                        src={
+                          item.image?.startsWith("http")
+                            ? item.image
+                            : `http://localhost:8000${item.image}`
+                        }
+                        alt={item.name}
+                        width={40}
+                        height={40}
+                        style={{ borderRadius: 6 }}
+                      />
+                    </td>
+                    <td>{item.name}</td>
+                    <td>{item.quantity}</td>
+                    <td>Rs. {item.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </Container>
   );
 };
