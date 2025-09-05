@@ -10,28 +10,39 @@ import {
   Alert,
   Carousel,
   ListGroup,
+  Tab,
+  Nav,
+  Table,
 } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import PrivateRoute from "../../utils/PrivateRoute";
 import api from "../../utils/api";
 import Feedback from "./Feedback";
-import { addToCart } from "../../store/slices/cartSlice"; // <-- Import your Redux action
+import { addToCart } from "../../store/slices/cartSlice";
+import {
+  FaMapMarkerAlt,
+  FaShareAlt,
+  FaShippingFast,
+  FaUndoAlt,
+  FaShieldAlt,
+  FaShoppingCart,
+} from "react-icons/fa";
+import "./ProductDetail.css";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // <-- Add this
+  const dispatch = useDispatch();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [reviews, setReviews] = useState([
-    { user_name: "Test", rating: 5, comment: "Nice!" },
-  ]);
+  const [reviews, setReviews] = useState([]);
   const [related, setRelated] = useState([]);
   const [relatedLoading, setRelatedLoading] = useState(true);
-  const [user, setUser] = useState(null); // <-- Add user state
+  const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState("specs");
 
-  // Fetch product
+  // Fetch product details
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -68,7 +79,7 @@ const ProductDetail = () => {
         const res = await api.get(
           `products/?category=${product.category}&exclude=${product.id}`
         );
-        setRelated(res.data.slice(0, 3));
+        setRelated(res.data.slice(0, 4));
       } catch {
         setRelated([]);
       } finally {
@@ -83,8 +94,6 @@ const ProductDetail = () => {
     dispatch(addToCart({ ...product, quantity: 1 }));
     alert("Added to cart!");
   };
-
-  // Buy Now हटाउने
 
   // Fetch user data from localStorage
   useEffect(() => {
@@ -116,9 +125,13 @@ const ProductDetail = () => {
   return (
     <PrivateRoute allowedRoles={["customer"]}>
       <Container className="mt-4">
+        {/* Top Section: Product Image + Info */}
         <Row>
-          <Col md={6}>
-            <Card>
+          <Col
+            md={5}
+            className="d-flex flex-column align-items-center justify-content-center"
+          >
+            <Card className="product-main-card">
               {product.images && product.images.length > 0 ? (
                 <Carousel>
                   {product.images.map((img, idx) => (
@@ -128,9 +141,9 @@ const ProductDetail = () => {
                         src={`http://localhost:8000${img}`}
                         alt={`Product image ${idx + 1}`}
                         style={{
-                          height: 350, // Set a fixed height
+                          height: 350,
                           objectFit: "contain",
-                          background: "#f8f9fa", // Optional: light background for empty space
+                          background: "#f8f9fa",
                         }}
                       />
                     </Carousel.Item>
@@ -142,59 +155,91 @@ const ProductDetail = () => {
                   src={product.image}
                   alt={product.name}
                   style={{
-                    height: 350, // Set the same fixed height
+                    height: 350,
                     objectFit: "contain",
                     background: "#f8f9fa",
                   }}
                 />
               )}
             </Card>
-          </Col>
-          <Col md={6}>
-            <h2>{product.name}</h2>
-            <p className="text-muted">{product.category}</p>
-            <p>{product.description}</p>
-            {/* Price black color */}
-            <h4 style={{ color: "#222" }}>Rs. {product.price}</h4>
-            {product.discount > 0 && (
-              <p className="text-danger">Discount: Rs. {product.discount}</p>
-            )}
-            <div className="d-flex align-items-center justify-content-between">
-              <p style={{ margin: 0 }}>Warranty: {product.warranty}</p>
-              {/* Add to Cart btn right of warranty */}
-              <button
-                className="btn btn-primary ms-3"
-                onClick={handleAddToCart}
-              >
-                Add to Cart
-              </button>
+            {/* Thumbnails */}
+            <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+              {(product.images || []).slice(0, 4).map((img, idx) => (
+                <img
+                  key={idx}
+                  src={`http://localhost:8000${img}`}
+                  alt={`thumb${idx + 1}`}
+                  className="product-thumbnail"
+                />
+              ))}
             </div>
-            <p>In Stock: {product.quantity}</p>
+          </Col>
+          <Col md={7}>
+            <div style={{ paddingLeft: 20 }}>
+              {/* Product Info */}
+              <h2 className="product-title">{product.name}</h2>
+              {/* Star Rating */}
+              <div
+                style={{
+                  fontSize: "1.2rem",
+                  color: "#f5c518",
+                  marginBottom: 8,
+                }}
+              >
+                {"★".repeat(product.rating || 4)}
+                {"☆".repeat(5 - (product.rating || 4))}
+                <span
+                  style={{ color: "#888", fontSize: "1rem", marginLeft: 8 }}
+                >
+                  ({reviews.length} reviews)
+                </span>
+              </div>
+              {/* Price */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <h3 className="product-price">Rs. {product.price}</h3>
+                {product.discount > 0 && (
+                  <span className="product-discount">
+                    -{product.discount} OFF
+                  </span>
+                )}
+              </div>
+              {/* Description */}
+              <p className="product-description">{product.description}</p>
+              {/* Add to Cart + Icons */}
+              <div className="add-to-cart-row">
+                <button className="add-to-cart-btn" onClick={handleAddToCart}>
+                  <FaShoppingCart size={22} style={{ color: "#fff" }} />
+                  Add to Cart
+                </button>
+                <button className="icon-btn" title="Location">
+                  <FaMapMarkerAlt size={22} style={{ color: "#000" }} />
+                </button>
+                <button className="icon-btn" title="Share">
+                  <FaShareAlt size={22} style={{ color: "#000" }} />
+                </button>
+              </div>
+              {/* Icons Row */}
+              <div className="product-icons-row">
+                <div style={{ textAlign: "center" }}>
+                  <FaShippingFast size={32} style={{ color: "#2196f3" }} />
+                  <div className="product-icon-label">Fast Shipping</div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <FaShieldAlt size={32} style={{ color: "#43a047" }} />
+                  <div className="product-icon-label">Warranty</div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <FaUndoAlt size={32} style={{ color: "#ff9800" }} />
+                  <div className="product-icon-label">Easy 30 Day Return</div>
+                </div>
+              </div>
+            </div>
           </Col>
         </Row>
 
         {/* Feedback / Review Section */}
         <Row className="mt-5">
           <Col>
-            <h4>Feedback / Reviews</h4>
-            {reviews.length === 0 ? (
-              <Alert variant="info">No feedback yet.</Alert>
-            ) : (
-              <ListGroup>
-                {reviews.map((rev, idx) => (
-                  <ListGroup.Item key={idx}>
-                    <strong>
-                      {rev.user_name}{" "}
-                      <span style={{ color: "#f5c518" }}>
-                        {"★".repeat(rev.rating)}
-                        {"☆".repeat(5 - rev.rating)}
-                      </span>
-                    </strong>
-                    <div>{rev.comment}</div>
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            )}
             {/* Feedback form always visible for customer */}
             {product?.id && user && (
               <Feedback
@@ -209,46 +254,37 @@ const ProductDetail = () => {
             )}
           </Col>
         </Row>
-
-        {/* Related Products Section */}
+        {/* Recommended Products Section */}
         <Row className="mt-5">
           <Col>
-            <h4>Related Products</h4>
-            {relatedLoading ? (
-              <Spinner animation="border" />
-            ) : related.length === 0 ? (
-              <Alert variant="info">No related products found.</Alert>
-            ) : (
-              <div style={{ display: "flex", overflowX: "auto", gap: "1rem" }}>
-                {related.slice(0, 6).map((rel) => (
-                  <Card
-                    key={rel.id}
-                    style={{
-                      minWidth: 220,
-                      maxWidth: 220,
-                      cursor: "pointer",
-                      flex: "0 0 auto",
-                    }}
-                    onClick={() => navigate(`/product/${rel.id}`)} // <-- Fix here
-                  >
-                    <Card.Img
-                      variant="top"
-                      src={rel.image}
-                      alt={rel.name}
-                      style={{
-                        height: 180, // Set a fixed height for related products
-                        objectFit: "contain",
-                        background: "#f8f9fa",
-                      }}
-                    />
-                    <Card.Body>
-                      <Card.Title>{rel.name}</Card.Title>
-                      <Card.Text>Rs. {rel.price}</Card.Text>
-                    </Card.Body>
-                  </Card>
-                ))}
-              </div>
-            )}
+            <h4 className="recommended-title">You May Also Like</h4>
+            <div className="recommended-list">
+              {related.map((rel) => (
+                <Card
+                  key={rel.id}
+                  className="recommended-card"
+                  onClick={() => navigate(`/product/${rel.id}`)}
+                >
+                  <Card.Img
+                    variant="top"
+                    src={rel.image}
+                    alt={rel.name}
+                    className="recommended-img"
+                  />
+                  <Card.Body>
+                    <Card.Title className="recommended-card-title">
+                      {rel.name}
+                    </Card.Title>
+                    <Card.Text className="recommended-card-price">
+                      Rs. {rel.price}
+                    </Card.Text>
+                    <button className="btn btn-primary btn-sm recommended-cart-btn">
+                      Add to Cart
+                    </button>
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
           </Col>
         </Row>
       </Container>
