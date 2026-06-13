@@ -1,0 +1,14 @@
+/* src/components/Navbar.css */
+.navbar .nav-link {
+  color: #333;
+  font-weight: 500;
+}
+.navbar .nav-link:hover {
+  color: #0d6efd;
+}
+.dropdown-menu {
+  min-width: 250px;
+  font-size: 0.9rem;
+}
+
+

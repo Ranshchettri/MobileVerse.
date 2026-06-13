@@ -1,0 +1,7 @@
+.add-product-card {
+  max-height: 80vh;
+  overflow-y: auto;
+  min-width: 320px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}

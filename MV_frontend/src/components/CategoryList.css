@@ -1,0 +1,11 @@
+.category-list .category-item {
+  width: 120px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+
+.category-list .category-item:hover {
+  background-color: #f1f1f1;
+  transform: scale(1.05);
+}

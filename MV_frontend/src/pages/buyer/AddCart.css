@@ -1,0 +1,15 @@
+.cart-scrollbar {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #bdbdbd transparent;
+}
+.cart-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.cart-scrollbar::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 4px;
+}
+.cart-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
