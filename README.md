@@ -1,5 +1,4 @@
 # 🛍️ MobileVerse — Full Stack Mobile E-Commerce Platform
-
 <p>
   <img src="https://img.shields.io/badge/FRONTEND-REACT-61dafb?style=for-the-badge&logo=react&logoColor=black" alt="React" />
   <img src="https://img.shields.io/badge/BACKEND-DJANGO-092e20?style=for-the-badge&logo=django&logoColor=white" alt="Django" />
