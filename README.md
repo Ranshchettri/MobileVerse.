@@ -1,4 +1,4 @@
-# 🛍️ MobileVerse — Full Stack Mobile E-Commerc Platform  
+# 🛍️ MobileVerse — Full Stack Mobile E-Commerce Platform  
                    
 <p>
   <img src="https://img.shields.io/badge/FRONTEND-REACT-61dafb?style=for-the-badge&logo=react&logoColor=black" alt="React" />
